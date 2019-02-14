@@ -1,8 +1,10 @@
 from bitarray import bitarray
-import sys
-import bitstring
-def getFile():
-    fileName = input("Please provide the name of the file you wish to compress: ")
+import time
+import numpy as np
+import os
+def getFile(name):
+    #fileName = input("Please provide the name of the file you wish to compress: ")
+    fileName = name
     try:
         file = open(fileName, "rb")
     except IOError:
@@ -19,11 +21,7 @@ def match(data,pos,L,W):
     for j in range (pos+1, end):
         start = max(0, pos - W)
         substring = data[pos:j]
-        #this is another implementation that uses rfind, doesnt work as of now but can use it to make the program faster
-        # string = data.rfind(substring,start,end)
-        # if (string!=-1 and len(substring) >length):
-        #     distance = string
-        #     length = len(substring)
+        
         for i in range(start, pos):	
             #this only looks at the l sized windows as a bigger one would not make a difference as it wouldn't match and check them
             string = data[i:i+j-pos]
@@ -33,17 +31,16 @@ def match(data,pos,L,W):
     if (distance > 0 and length >0):
         return (distance, length)
     return None
-def write(bits):
+def write(bits,test):
     try:
-        file = open("compressed.bin","wb")
-        #file.write(bits.tobytes())
-        #file.close()
+        file = open("compressed/"+str(test)+".bin","wb")
         bits.tofile(file)
     except IOError:
         print ("Couldn't find or write to file")
 
 #data for the lz encoder needs to be a string of characters for it to work
-def lzEncoder(data,W,L):
+def lzEncoder(filename,W,L,test):
+    data = getFile(filename)
     if L>W:
         print("Length of look ahead buffer is bigger than the size of the sliding window.")
         print("The size of L will be reduced to ",W," for improved performance")
@@ -52,16 +49,18 @@ def lzEncoder(data,W,L):
 
     output = bitarray(endian = "big")
     # pos is the coding position 
-    pos = 0;
+    pos = 0
     #first element is always going to appear as that so we append it and put pos in the next position
     #this is to convert it to bytes
     #output.append(False)
     (dis,length) = (0,0)
-    output.frombytes(chr(dis).encode())
-    output.frombytes(chr(length).encode())        
-    output.frombytes(chr(data[pos]).encode()) 
+  
 
-    pos = 1;
+    output.frombytes(chr(dis).encode('utf-16'))
+    output.frombytes(chr(length).encode('utf-8'))        
+    output.frombytes(chr(data[pos]).encode('utf-8')) 
+
+    pos = 1
     
     while pos<len(data):
         matching = match(data,pos,L,W)
@@ -69,22 +68,42 @@ def lzEncoder(data,W,L):
         (dis,length) = (0,0)
         if matching:
             (dis, length) = matching
-
-            output.frombytes(chr(dis).encode())
-            output.frombytes(chr(length).encode())
+            output.frombytes(chr(dis).encode('utf-16'))
+            output.frombytes(chr(length).encode('utf-8'))
             try:
-                output.frombytes(chr(data[pos+length]).encode())
+                output.frombytes(chr(data[pos+length]).encode('utf-8'))
             except:
-                output.frombytes(chr(data[pos+length-1]).encode())
+                output.frombytes(chr(data[pos+length-1]).encode('utf-8'))
             pos +=length+1
                 
                 
         #since a match was not found, the input will just be by itself with the next character
         else:
-            output.frombytes(b'\x00')
-            output.frombytes(b'\x00')
-            output.frombytes(chr(data[pos]).encode())
+            output.frombytes(chr(dis).encode('utf-16'))
+            output.frombytes(chr(length).encode('utf-8'))
+            output.frombytes(chr(data[pos]).encode('utf-8'))
             pos +=1
     output.fill()
-    write(output)  
-lzEncoder(getFile(),100,80)
+    write(output,test) 
+
+#lzEncoder("testTxt/10.txt",32000,255,"one")
+
+data = np.empty((11,5),dtype=np.object)
+data[0,] = ["originalSize","compressedSize","Ratio","Window","Running Time"]
+for i in range (10):
+    filename = 'testTxt/'+str(i+1)+'.txt'
+    counter = 1
+    for j in [500,1000,2000,4000,8000,160000,320000,64000,65535,12000]:
+        start = time.time()
+        lzEncoder(filename,j,255,i+1+j)
+        end = time.time()
+        data[counter,0] = os.path.getsize('testTxt/'+str(i+1)+'.txt')
+        data[counter,1] = os.path.getsize('compressed/'+str(i+1+j)+'.bin')
+        data[counter,2] = data[i+1,1]/data[i+1,0]
+        data[counter,3] = j
+        data[counter,4] = end-start
+        counter += 1
+        print (data)
+    file = open(str(i)+".txt","w")
+    file.write(data)
+    file.close()

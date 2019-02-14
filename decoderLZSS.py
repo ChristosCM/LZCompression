@@ -5,37 +5,29 @@ def decompress(inp):
     data = bitarray(endian='big')
     with open(inp, 'rb') as file:
         data.fromfile(file)
-    encoded = []
     while len(data) >= 1:
-        print (encoded)
 
         #this is for the lzss algorithm, another format must be used for the lz77
         flag = data.pop(0)
         if not flag:
-            byte = data[0:8].tobytes().decode()
+            byte = data[0:8].tobytes().decode('utf-8')
             output_buffer.append(byte)
-            encoded.append((0,0,byte))
             del data[0:8]
         else:
+            distance = ord(data[0:32].tobytes().decode('utf-16'))
+            length = ord(data[32:40].tobytes().decode('utf-8'))
+            del data[0:40]
+            symbol = data[0:8].tobytes().decode('utf-8')
             
-            byte1 = ord(data[0:8].tobytes().decode())
-            byte2 = ord(data[8:16].tobytes().decode())
-            del data[0:16]
-            byte3 = data[0:8].tobytes().decode()
-            distance = byte1
-            length = byte2
-            
-            encoded.append((distance,length,byte3))
+            #maybe change this to make it more efficient
             for i in range(length):
                 output_buffer.append(output_buffer[-distance])
 
-
-            output_buffer.append(byte3)
+            output_buffer.append(symbol)
             del data[0:8]
 
 
     out_data =  ''.join(output_buffer)
-    print (encoded)
     print (out_data)
     
 
