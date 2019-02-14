@@ -5,7 +5,6 @@ def decompress(inp):
     with open(inp, 'rb') as file:
         data.fromfile(file)
     while len(data) >= 1:
-        print (output_buffer)
         #this is for the lzss algorithm, another format must be used for the lz77
         distance = ord(data[0:8].tobytes().decode())
         length = ord(data[8:16].tobytes().decode())
@@ -22,4 +21,4 @@ def decompress(inp):
     print (out_data)
     
 
-decompress("compressed.txt")
+decompress("compressed.bin")
