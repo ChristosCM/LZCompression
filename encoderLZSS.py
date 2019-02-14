@@ -7,7 +7,7 @@ def getFile():
     except IOError:
         print("File was not found")
     data = file.read()
-    data.strip()
+    print (data)
     file.close()
     return data
 
@@ -18,11 +18,7 @@ def match(data,pos,L,W):
     for j in range (pos+1, end):
         start = max(0, pos - W)
         substring = data[pos:j]
-        #this is another implementation that uses rfind, doesnt work as of now but can use it to make the program faster
-        # string = data.rfind(substring,start,end)
-        # if (string!=-1 and len(substring) >length):
-        #     distance = string
-        #     length = len(substring)
+        
         for i in range(start, pos):	
             #this only looks at the l sized windows as a bigger one would not make a difference as it wouldn't match and check them
             string = data[i:i+j-pos]
@@ -57,7 +53,7 @@ def lzEncoder(data,W,L):
     encoded.append((0,0,data[0]))
     #this is to convert it to bytes
     output.append(False)
-    output.frombytes(chr(data[pos]).encode("ISO-8859-1"))
+    output.frombytes(chr(data[pos]).encode())    
     pos = 1;
     while pos<len(data):
         matching = match(data,pos,L,W)
@@ -67,9 +63,9 @@ def lzEncoder(data,W,L):
             encoded.append((dis,length,data[pos+length]))
             #following is inserting the bits in an array to process
             output.append(True)
-            output.frombytes(chr(dis>>4).encode("ISO-8859-1"))
-            output.frombytes(chr(((dis & 0xf) << 4) | length).encode("ISO-8859-1"))
-            output.frombytes(chr(data[pos+length]).encode("ISO-8859-1"))
+            output.frombytes(chr(dis).encode())
+            output.frombytes(chr(length).encode())
+            output.frombytes(chr(data[pos+length]).encode())
             pos +=length+1
                 
                 
@@ -77,7 +73,7 @@ def lzEncoder(data,W,L):
         else:
             encoded.append((0,0,data[pos]))
             output.append(False)
-            output.frombytes(chr(data[pos]).encode("ISO-8859-1"))
+            output.frombytes(chr(data[pos]).encode())
             
             
             pos +=1
