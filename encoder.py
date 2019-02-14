@@ -7,6 +7,7 @@ def getFile():
     except IOError:
         print("File was not found")
     data = file.read()
+    data.strip()
     file.close()
     return data
 
@@ -50,6 +51,9 @@ def lzEncoder(data,W,L):
     pos = 0;
     #first element is always going to appear as that so we append it and put pos in the next position
     encoded.append((0,0,data[0]))
+    #this is to convert it to bytes
+    output.append(False)
+    output.frombytes(chr(data[pos]).encode("utf8"))
     pos = 1;
     while pos<len(data):
         matching = match(data,pos,L,W)
@@ -59,7 +63,8 @@ def lzEncoder(data,W,L):
             encoded.append((dis,length,data[pos+length]))
             output.append(True)
             output.frombytes(chr(dis>>4).encode())
-            output.frombytes(chr(((dis & 0xf) << 4) | length).encode())
+            output.frombytes(chr(((dis & 0xf) << 4) | length).encode("utf8"))
+            output.frombytes(chr(data[pos+length]).encode("utf8"))
             pos +=length+1
                 
                 
@@ -67,11 +72,11 @@ def lzEncoder(data,W,L):
         else:
             encoded.append((0,0,data[pos]))
             output.append(False)
-            output.frombytes(chr(data[pos]).encode())
+            output.frombytes(chr(data[pos]).encode("utf8"))
+            
             
             pos +=1
-
     write(output)     
 
 
-lzEncoder(getFile(),50,6)
+lzEncoder(getFile(),400,80)
