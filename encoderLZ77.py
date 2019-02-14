@@ -35,7 +35,7 @@ def match(data,pos,L,W):
     return None
 def write(bits):
     try:
-        file = open("compressed.txt","wb")
+        file = open("compressed.bin","wb")
         #file.write(bits.tobytes())
         #file.close()
         bits.tofile(file)
@@ -72,7 +72,10 @@ def lzEncoder(data,W,L):
 
             output.frombytes(chr(dis).encode())
             output.frombytes(chr(length).encode())
-            output.frombytes(chr(data[pos+length]).encode())
+            try:
+                output.frombytes(chr(data[pos+length]).encode())
+            except:
+                output.frombytes(chr(data[pos+length-1]).encode())
             pos +=length+1
                 
                 
@@ -84,4 +87,4 @@ def lzEncoder(data,W,L):
             pos +=1
     output.fill()
     write(output)  
-lzEncoder(getFile(),400,80)
+lzEncoder(getFile(),100,80)
