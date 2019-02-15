@@ -86,24 +86,30 @@ def lzEncoder(filename,W,L,test):
     output.fill()
     write(output,test) 
 
-#lzEncoder("testTxt/10.txt",32000,255,"one")
 
-data = np.empty((11,5),dtype=np.object)
+data = np.empty((7,5),dtype=np.object)
+
 data[0,] = ["originalSize","compressedSize","Ratio","Window","Running Time"]
-for i in range (10):
+
+for i in range (2,6):
+    file = open(str(i)+".txt","w")
+    file.write(",".join([",".join(item) for item in data.astype(str)]))
+    file.write("\n")
+    file.close() 
     filename = 'testTxt/'+str(i+1)+'.txt'
     counter = 1
-    for j in [500,1000,2000,4000,8000,160000,320000,64000,65535,12000]:
+    for j in [4000,8000,160000,320000,64000,65535,80000]:
         start = time.time()
         lzEncoder(filename,j,255,i+1+j)
         end = time.time()
         data[counter,0] = os.path.getsize('testTxt/'+str(i+1)+'.txt')
         data[counter,1] = os.path.getsize('compressed/'+str(i+1+j)+'.bin')
-        data[counter,2] = data[i+1,1]/data[i+1,0]
+        data[counter,2] = data[counter,1]/data[counter,0]
         data[counter,3] = j
         data[counter,4] = end-start
-        counter += 1
-        print (data)
+    print (i)
+    print (data)
     file = open(str(i)+".txt","w")
-    file.write(data)
-    file.close()
+    file.write(",".join([",".join(item) for item in data.astype(str)]))
+    file.write("\n")
+    file.close() 

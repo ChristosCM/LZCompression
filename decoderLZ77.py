@@ -1,5 +1,6 @@
 from bitarray import bitarray
 import time
+import os
 def decompress(inp):
     output_buffer = []
     data = bitarray(endian='big')
@@ -19,7 +20,14 @@ def decompress(inp):
 
 
     out_data =  ''.join(output_buffer)
-    print (out_data)
-    
 
-decompress("compressed/2001.bin")
+times = []
+for file in os.listdir("compressed/"):
+    filename = os.fsdecode(file)
+
+    if filename.endswith(".bin"): 
+        start = time.time()
+        decompress("compressed/"+filename)
+        end = time.time()
+        times.append((end-start)*1000)
+print (times)

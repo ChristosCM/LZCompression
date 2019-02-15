@@ -1,7 +1,10 @@
 from bitarray import bitarray
 import sys
-def getFile():
-    fileName = input("Please provide the name of the file you wish to compress: ")
+import time
+import numpy as np
+import os
+def getFile(name):
+    fileName = name
     try:
         file = open(fileName, "rb")
     except IOError:
@@ -29,17 +32,16 @@ def match(data,pos,L,W):
     if (distance > 0 and length >0):
         return (distance, length)
     return None
-def write(bits):
+def write(bits,test):
     try:
-        file = open("compressed.bin","wb")
-        #file.write(bits.tobytes())
-        #file.close()
+        file = open("compressedSS/"+str(test)+".bin","wb")
         bits.tofile(file)
     except IOError:
         print ("Couldn't find or write to file")
+        
 
 #data for the lz encoder needs to be a string of characters for it to work
-def lzEncoder(filename,W,L):
+def lzEncoder(filename,W,L,test):
     data = getFile(filename)
     if L>W:
         print("Length of look ahead buffer is bigger than the size of the sliding window.")
@@ -79,25 +81,30 @@ def lzEncoder(filename,W,L):
             output.frombytes(chr(data[pos]).encode('utf-8'))
             
             pos +=1
+    #not really necessary
     output.fill()
-    write(output)     
+    write(output,test)     
 
-data = np.empty((11,5),dtype=np.object)
+
+
+data = np.empty((7,5),dtype=np.object)
 data[0,] = ["originalSize","compressedSize","Ratio","Window","Running Time"]
-for i in range (10):
+for i in range (6):
     filename = 'testTxt/'+str(i+1)+'.txt'
     counter = 1
-    for j in [500,1000,2000,4000,8000,160000,320000,64000,65535,12000]:
+    for j in [4000,8000,160000,320000,64000,65535,12000]:
         start = time.time()
         lzEncoder(filename,j,255,i+1+j)
         end = time.time()
         data[counter,0] = os.path.getsize('testTxt/'+str(i+1)+'.txt')
-        data[counter,1] = os.path.getsize('compressed/'+str(i+1+j)+'.bin')
-        data[counter,2] = data[i+1,1]/data[i+1,0]
+        data[counter,1] = os.path.getsize('compressedSS/'+str(i+1+j)+'.bin')
+        data[counter,2] = data[counter,1]/data[counter,0]
         data[counter,3] = j
         data[counter,4] = end-start
         counter += 1
-        print (data)
-    file = open(str(i)+".txt","w")
-    file.write(data)
-    file.close()
+    print (i)
+    print (data)
+    file = open("resSS/"+str(i+1)+".txt","w")
+    file.write(",".join([",".join(item) for item in data.astype(str)]))
+    file.write("\n")
+    file.close() 

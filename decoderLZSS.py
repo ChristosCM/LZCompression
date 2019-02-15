@@ -1,5 +1,6 @@
 from bitarray import bitarray
-import struct
+import time
+import os
 def decompress(inp):
     output_buffer = []
     data = bitarray(endian='big')
@@ -28,7 +29,16 @@ def decompress(inp):
 
 
     out_data =  ''.join(output_buffer)
-    print (out_data)
     
 
-decompress("compressed.bin")
+
+times = []
+for file in os.listdir("compressedSS/"):
+    filename = os.fsdecode(file)
+
+    if filename.endswith(".bin"): 
+        start = time.time()
+        decompress("compressedSS/"+filename)
+        end = time.time()
+        times.append((end-start)*1000)
+print (times)
