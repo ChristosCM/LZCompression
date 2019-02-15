@@ -86,28 +86,23 @@ def lzEncoder(filename,W,L,test):
     output.fill()
     write(output,test)     
 
-lzEncoder("testTxt/1.txt",4000,255,"testing2")
-'''
 data = np.empty((8,5),dtype=np.object)
 data[0,] = ["originalSize","compressedSize","Ratio","Window","Running Time"]
+
 for i in range (6):
+    
     filename = 'testTxt/'+str(i+1)+'.txt'
     counter = 1
-    for j in [4000,8000,160000,320000,64000,65535,80000]:
-        start = time.time()
-        lzEncoder(filename,j,255,i+1+j)
-        end = time.time()
-        data[counter,0] = os.path.getsize('testTxt/'+str(i+1)+'.txt')
-        data[counter,1] = os.path.getsize('compressedSS/'+str(i+1+j)+'.bin')
-        data[counter,2] = data[counter,1]/data[counter,0]
-        data[counter,3] = j
-        data[counter,4] = end-start
-        counter += 1
+    start = time.time()
+    lzEncoder(filename,65535,255,i+1+counter)
+    end = time.time()
+    data[counter,0] = os.path.getsize('testTxt/'+str(i+1)+'.txt')
+    data[counter,1] = os.path.getsize('compressedSS/'+str(i+1+counter)+'.bin')
+    data[counter,2] = data[counter,1]/data[counter,0]
+    data[counter,3] = 65535
+    data[counter,4] = end-start
+    counter +=1
+        
     print (i)
     print (data)
-    file = open("resSS/"+str(i+1)+".txt","w")
-    file.write(",".join([",".join(item) for item in data.astype(str)]))
-    file.write("\n")
-    file.close() 
-    '''
     
