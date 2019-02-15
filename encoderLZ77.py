@@ -34,7 +34,8 @@ def match(data,pos,L,W):
 def write(bits,test):
     try:
         file = open("compressed/"+str(test)+".bin","wb")
-        bits.tofile(file)
+        file.write(bits.tobytes())
+        file.close()
     except IOError:
         print ("Couldn't find or write to file")
 
@@ -56,8 +57,8 @@ def lzEncoder(filename,W,L,test):
     (dis,length) = (0,0)
   
 
-    output.frombytes(chr(dis).encode('utf-16'))
-    output.frombytes(chr(length).encode('utf-8'))        
+    output.frombytes(chr(dis).encode('utf-16be'))
+    output.frombytes(chr(length).encode('utf-8'))   
     output.frombytes(chr(data[pos]).encode('utf-8')) 
 
     pos = 1
@@ -68,7 +69,9 @@ def lzEncoder(filename,W,L,test):
         (dis,length) = (0,0)
         if matching:
             (dis, length) = matching
-            output.frombytes(chr(dis).encode('utf-16'))
+            output.frombytes(chr(dis).encode('utf-16be'))
+            
+
             output.frombytes(chr(length).encode('utf-8'))
             try:
                 output.frombytes(chr(data[pos+length]).encode('utf-8'))
@@ -79,15 +82,19 @@ def lzEncoder(filename,W,L,test):
                 
         #since a match was not found, the input will just be by itself with the next character
         else:
-            output.frombytes(chr(dis).encode('utf-16'))
+
+            output.frombytes(chr(dis).encode('utf-16be'))
             output.frombytes(chr(length).encode('utf-8'))
             output.frombytes(chr(data[pos]).encode('utf-8'))
             pos +=1
+
     output.fill()
     write(output,test) 
 
 
-data = np.empty((7,5),dtype=np.object)
+#lzEncoder("testTxt/1.txt", 200,200,"testing")
+
+data = np.empty((8,5),dtype=np.object)
 
 data[0,] = ["originalSize","compressedSize","Ratio","Window","Running Time"]
 
@@ -98,7 +105,7 @@ for i in range (2,6):
     file.close() 
     filename = 'testTxt/'+str(i+1)+'.txt'
     counter = 1
-    for j in [4000,8000,160000,320000,64000,65535,80000]:
+    for j in [4000,8000,160000,320000,64000,65535]:
         start = time.time()
         lzEncoder(filename,j,255,i+1+j)
         end = time.time()
@@ -107,6 +114,7 @@ for i in range (2,6):
         data[counter,2] = data[counter,1]/data[counter,0]
         data[counter,3] = j
         data[counter,4] = end-start
+        counter +=1
     print (i)
     print (data)
     file = open(str(i)+".txt","w")

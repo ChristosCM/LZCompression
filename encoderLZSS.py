@@ -35,7 +35,8 @@ def match(data,pos,L,W):
 def write(bits,test):
     try:
         file = open("compressedSS/"+str(test)+".bin","wb")
-        bits.tofile(file)
+        file.write(bits.tobytes())
+        file.close()
     except IOError:
         print ("Couldn't find or write to file")
         
@@ -65,7 +66,7 @@ def lzEncoder(filename,W,L,test):
             (dis, length) = matching
             #following is inserting the bits in an array to process
             output.append(True)
-            output.frombytes(chr(dis).encode('utf-16'))
+            output.frombytes(chr(dis).encode('utf-16be'))
             output.frombytes(chr(length).encode('utf-8'))
             try:
                 output.frombytes(chr(data[pos+length]).encode('utf-8'))
@@ -85,14 +86,14 @@ def lzEncoder(filename,W,L,test):
     output.fill()
     write(output,test)     
 
-
-
-data = np.empty((7,5),dtype=np.object)
+lzEncoder("testTxt/1.txt",4000,255,"testing2")
+'''
+data = np.empty((8,5),dtype=np.object)
 data[0,] = ["originalSize","compressedSize","Ratio","Window","Running Time"]
 for i in range (6):
     filename = 'testTxt/'+str(i+1)+'.txt'
     counter = 1
-    for j in [4000,8000,160000,320000,64000,65535,12000]:
+    for j in [4000,8000,160000,320000,64000,65535,80000]:
         start = time.time()
         lzEncoder(filename,j,255,i+1+j)
         end = time.time()
@@ -108,3 +109,5 @@ for i in range (6):
     file.write(",".join([",".join(item) for item in data.astype(str)]))
     file.write("\n")
     file.close() 
+    '''
+    
