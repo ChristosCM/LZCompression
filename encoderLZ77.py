@@ -98,23 +98,23 @@ data = np.empty((8,5),dtype=np.object)
 
 data[0,] = ["originalSize","compressedSize","Ratio","Window","Running Time"]
 
-for i in range (2,6):
+for i in range (6):
     file = open(str(i)+".txt","w")
     file.write(",".join([",".join(item) for item in data.astype(str)]))
     file.write("\n")
     file.close() 
     filename = 'testTxt/'+str(i+1)+'.txt'
     counter = 1
-    for j in [4000,8000,160000,320000,64000,65535]:
-        start = time.time()
-        lzEncoder(filename,j,255,i+1+j)
-        end = time.time()
-        data[counter,0] = os.path.getsize('testTxt/'+str(i+1)+'.txt')
-        data[counter,1] = os.path.getsize('compressed/'+str(i+1+j)+'.bin')
-        data[counter,2] = data[counter,1]/data[counter,0]
-        data[counter,3] = j
-        data[counter,4] = end-start
-        counter +=1
+    start = time.time()
+    lzEncoder(filename,65535,255,i+1+counter)
+    end = time.time()
+    data[counter,0] = os.path.getsize('testTxt/'+str(i+1)+'.txt')
+    data[counter,1] = os.path.getsize('compressed/'+str(i+1+counter)+'.bin')
+    data[counter,2] = data[counter,1]/data[counter,0]
+    data[counter,3] = 65535
+    data[counter,4] = end-start
+    counter +=1
+        
     print (i)
     print (data)
     file = open(str(i)+".txt","w")
